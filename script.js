@@ -13,14 +13,26 @@
   const nextBtn = document.querySelector('[data-next]');
   const hint = document.querySelector('[data-hint]');
   const TILT = 0.5; // mouse-tilt strength (0 = off, 1 = full)
+  const mobile = window.matchMedia('(max-width: 899px)');
 
-  // Fit every slide (1920×1080 design canvas) to fill the viewport exactly
+  // Desktop: each slide is a 1920×1080 canvas fitted to the viewport.
+  // Mobile: slides reflow on a 720px-wide canvas scaled to the screen width.
+  let lastW = 0;
   const fit = () => {
     const w = de.clientWidth, h = window.innerHeight;
-    const s = Math.min(w / 1920, h / 1080);
-    de.style.setProperty('--s', s.toFixed(5));
-    de.style.setProperty('--sw', (w / s).toFixed(2) + 'px');
-    de.style.setProperty('--sh', Math.min(h / s, 1440).toFixed(2) + 'px');
+    if (mobile.matches) {
+      const s = w / 720;
+      de.style.setProperty('--s', s.toFixed(5));
+      de.style.setProperty('--sw', '720px');
+      de.style.setProperty('--sh', 'auto');
+      if (w !== lastW) de.style.setProperty('--mh', (h / s).toFixed(2) + 'px'); // ignore URL-bar resizes
+    } else {
+      const s = Math.min(w / 1920, h / 1080);
+      de.style.setProperty('--s', s.toFixed(5));
+      de.style.setProperty('--sw', (w / s).toFixed(2) + 'px');
+      de.style.setProperty('--sh', Math.min(h / s, 1440).toFixed(2) + 'px');
+    }
+    lastW = w;
   };
   fit();
   window.addEventListener('resize', fit);
@@ -60,14 +72,15 @@
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
         const s = en.target;
-        if (en.intersectionRatio >= 0.55 && !s.hasAttribute('data-active')) {
+        const need = Math.min(en.boundingClientRect.height, window.innerHeight) * 0.5;
+        if (en.isIntersecting && en.intersectionRect.height >= need && !s.hasAttribute('data-active')) {
           s.setAttribute('data-active', '');
           countUp(s);
         } else if (!en.isIntersecting) {
           s.removeAttribute('data-active');
         }
       });
-    }, { threshold: [0, 0.55] });
+    }, { threshold: Array.from({ length: 21 }, (_, i) => i / 20) });
     sections.forEach((s) => io.observe(s));
   }
 
@@ -111,8 +124,9 @@
   // Mouse-driven 3D tilt
   let tx = 0, ty = 0, cx = 0, cy = 0;
   window.addEventListener('pointermove', (e) => {
-    tx = ((e.clientX / window.innerWidth) * 2 - 1) * TILT;
-    ty = ((e.clientY / window.innerHeight) * 2 - 1) * TILT;
+    const k = mobile.matches || e.pointerType !== 'mouse' ? 0 : TILT;
+    tx = ((e.clientX / window.innerWidth) * 2 - 1) * k;
+    ty = ((e.clientY / window.innerHeight) * 2 - 1) * k;
   });
 
   // Highlight the header link for the current chapter
