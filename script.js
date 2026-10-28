@@ -175,4 +175,22 @@
     requestAnimationFrame(loop);
   };
   loop();
+
+  // PWA: register the service worker; when a new version takes over, reload once
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' }).then((reg) => {
+        const check = () => reg.update().catch(() => {});
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+        setInterval(check, 30 * 60 * 1000);
+      }).catch(() => {});
+    });
+  }
 })();

@@ -10,7 +10,9 @@ img { max-width: none; }
 
 /* ---------- Components ---------- */
 .site-main-1 {
-  background: #050506;
+  position: relative;
+  z-index: 1;
+  background: transparent;
   overflow: clip;
 }
 
@@ -268,7 +270,7 @@ img { max-width: none; }
   height: var(--sh,1080px);
   zoom: var(--s,1);
   scroll-snap-align: start;
-  background: #070708;
+  background: transparent;
   color: #f4f1ee;
   font-family: 'Readex Pro',sans-serif;
   overflow: hidden;
@@ -418,7 +420,7 @@ img { max-width: none; }
   height: var(--sh,1080px);
   zoom: var(--s,1);
   scroll-snap-align: start;
-  background-color: #0a0a0b;
+  background-color: transparent;
   background-image: linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
   background-size: 96px 96px;
   color: #f4f1ee;
@@ -1219,7 +1221,7 @@ img { max-width: none; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(to bottom,rgba(7,7,8,.92),rgba(7,7,8,.7) 50%,rgba(7,7,8,.95));
+  background: linear-gradient(to bottom,rgba(5,5,6,.72),rgba(5,5,6,.45) 50%,rgba(5,5,6,.78));
 }
 
 .stack-17 {
@@ -2427,3 +2429,11 @@ section[data-armed]:not([data-active])>*{opacity:0}
   .stack-34 { text-align: right; }
   .txt-62 { white-space: normal; }
 }
+
+/* ---------- Fixed brand backdrop + watermark ---------- */
+/* The watermark sits above the slides with a screen blend: it only adds light,
+   so it shows on every slide (photos included) without hiding any content. */
+.brand-watermark{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;mix-blend-mode:screen}
+.brand-backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(90% 80% at 0% 100%,rgba(255,106,26,.06),transparent 60%),#050506}
+.brand-backdrop-mark{position:absolute;left:-2vh;bottom:-8vh;height:96vh;width:auto;max-width:none;opacity:.15;-webkit-mask-image:linear-gradient(to top,#000 45%,rgba(0,0,0,.6) 100%);mask-image:linear-gradient(to top,#000 45%,rgba(0,0,0,.6) 100%);translate:0 calc(var(--prog,0) * -10vh);will-change:translate}
+@media (max-width: 899px){.brand-backdrop-mark{height:auto;width:110vw;left:-28vw;bottom:-4vh;opacity:.13}}
